@@ -1,4 +1,4 @@
-#include "bthread.h"
+#include "bthread_private.h"
 
 int bthread_join(bthread_t bthread, void **retval) {
 	volatile __bthread_scheduler_private* scheduler = bthread_get_scheduler();

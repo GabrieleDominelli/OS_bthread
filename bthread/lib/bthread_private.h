@@ -1,6 +1,9 @@
 #ifndef __BTHREAD_PRIVATE_H__
 #define __BTHREAD_PRIVATE_H__
 
+#include "bthread.h"
+#include "tqueue.h"
+
 /**
 Keep track of their execution state.
 */
