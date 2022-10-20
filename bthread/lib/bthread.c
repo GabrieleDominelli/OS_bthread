@@ -1,6 +1,20 @@
 #include "bthread_private.h"
 
 
+
+/**
+Creates a new thread structure and puts it at the end of the queue. The thread identifier (stored
+in the buffer pointed by bthread) corresponds to the position in the queue. The thread is not
+started when calling this function. Attributes passed through the attr argument are ignored
+(thus it is possible to pass a NULL pointer). The stack pointer for new created threads is NULL.
+*/
+int bthread_create(bthread_t *bthread, const bthread_attr_t *attr, void *(*start_routine) (void *), void *arg){
+    scheduler->queue = malloc(sizeof(TQueue));
+    tqueue_enqueue(scheduler->queue, "BOHHHHHHHHHHHH");
+
+    __bthread_private* thread = malloc(sizeof(__bthread_private));
+}
+
 int bthread_join(bthread_t bthread, void **retval) {
 	volatile __bthread_scheduler_private* scheduler = bthread_get_scheduler();
 	scheduler->current_item = scheduler->queue;
@@ -28,3 +42,5 @@ int bthread_join(bthread_t bthread, void **retval) {
 		bthread_exit(tp->body(tp->arg));
 	}
 }
+
+
