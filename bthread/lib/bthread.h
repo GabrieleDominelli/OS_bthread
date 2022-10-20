@@ -1,6 +1,8 @@
 #ifndef __BTHREAD_H__
 #define __BTHREAD_H__
 
+#include <stdint.h>
+
 /**
 “Container” structure for the thread context.
 It references the private data "_bthread_private", hiding the structure to the end-user.

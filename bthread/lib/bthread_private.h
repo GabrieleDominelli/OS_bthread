@@ -3,6 +3,9 @@
 
 #include "bthread.h"
 #include "tqueue.h"
+#include <setjmp.h>
+
+#define STACK_SIZE 10000
 
 /**
 Keep track of their execution state.
@@ -37,6 +40,8 @@ typedef struct {
 	jmp_buf context;
 	bthread_t current_tid;		// Current executing thread id
 } __bthread_scheduler_private;
+
+
 
 /**
 This private function creates, maintains and returns a static pointer to the singleton instance of
