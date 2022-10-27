@@ -9,10 +9,20 @@ started when calling this function. Attributes passed through the attr argument 
 (thus it is possible to pass a NULL pointer). The stack pointer for new created threads is NULL.
 */
 int bthread_create(bthread_t *bthread, const bthread_attr_t *attr, void *(*start_routine) (void *), void *arg){
+    __bthread_scheduler_private* scheduler = bthread_get_scheduler();
     scheduler->queue = malloc(sizeof(TQueue));
-    tqueue_enqueue(scheduler->queue, "BOHHHHHHHHHHHH");
 
     __bthread_private* thread = malloc(sizeof(__bthread_private));
+
+    thread->stack = NULL;
+    thread->arg = arg;
+    thread->attr = *attr;
+    thread->body = start_routine;
+
+    bthread = (bthread_t *) thread;
+
+	tqueue_enqueue(scheduler->queue, bthread);
+
 }
 
 int bthread_join(bthread_t bthread, void **retval) {
@@ -41,6 +51,31 @@ int bthread_join(bthread_t bthread, void **retval) {
 
 		bthread_exit(tp->body(tp->arg));
 	}
+}
+
+/**
+Saves the thread context and restores (long-jumps to) the scheduler context. Saving the thread
+context is achieved using sigsetjmp, which can save the signal mask if the provided additional
+parameter is not zero (to restore both the context and the signal mask the corresponding call is siglongjmp).
+Saving and restoring the signal mask is required for implementing preemption.
+*/
+void bthread_yield(){
+    __bthread_scheduler_private* scheduler = bthread_get_scheduler();
+    __bthread_private* currThread = (__bthread_private*) tqueue_get_data(scheduler->current_item);
+
+    if(!save_context(currThread->context)) {
+        restore_context(scheduler->context);
+    }
+}
+
+/**
+Terminates the calling thread and returns a value via retval that will be available to another
+thread in the same process that calls bthread_join, then yields to the scheduler. Between
+bthread_exit and the corresponding bthread_join the thread stays in the
+__BTHREAD_ZOMBIE state.
+*/
+void bthread_exit(void *retval) {
+
 }
 
 

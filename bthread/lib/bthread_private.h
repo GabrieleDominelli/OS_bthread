@@ -50,8 +50,7 @@ Other functions will call this method to obtain this pointer. This function shou
 outside the library.
 */
 __bthread_scheduler_private* bthread_get_scheduler();
-
-static __bthread_scheduler_private* scheduler;
+__bthread_scheduler_private* scheduler;
 
 void bthread_cleanup();
 
