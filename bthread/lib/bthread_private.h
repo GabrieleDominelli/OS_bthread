@@ -11,36 +11,35 @@
 Keep track of their execution state.
 */
 typedef enum {
-	__BTHREAD_READY = 0,	// The thread is ready to be executed
-	__BTHREAD_BLOCKED,		// The thread is currently blocked due to some synchronization primitive (lock)
-	__BTHREAD_SLEEPING,		// The thread is sleeping for some amount of time.
-	__BTHREAD_ZOMBIE		// The thread has exited but is waiting for another thread to join
+    __BTHREAD_READY = 0,    // The thread is ready to be executed
+    __BTHREAD_BLOCKED = 1,        // The thread is currently blocked due to some synchronization primitive (lock)
+    __BTHREAD_SLEEPING = 2,        // The thread is sleeping for some amount of time.
+    __BTHREAD_ZOMBIE = 3        // The thread has exited but is waiting for another thread to join
 } bthread_state;
 
 /**
 Contains all the information regarding a thread.
 */
 typedef struct {
-	bthread_t tid;			// Thread identifier
-	bthread_routine body;	// Body routine
-	void* arg;				// Body routine's arguments
-	bthread_state state;	// Execution state
-	bthread_attr_t attr;	// Thread attributes
-	char* stack;			// Stack
-	jmp_buf context;		// Stack's context
-	void* retval;			// Return value
+    bthread_t tid;            // Thread identifier
+    bthread_routine body;    // Body routine
+    void *arg;                // Body routine's arguments
+    bthread_state state;    // Execution state
+    bthread_attr_t attr;    // Thread attributes
+    char *stack;            // Stack
+    jmp_buf context;        // Stack's context
+    void *retval;            // Return value
 } __bthread_private;
 
 /**
 This is responsible for initializing and scheduling threads.
 */
 typedef struct {
-	TQueue queue;				// Queue of threads
-	TQueue current_item;		// Current executing thread in queue
-	jmp_buf context;
-	bthread_t current_tid;		// Current executing thread id
+    TQueue queue;                // Queue of threads
+    TQueue current_item;        // Current executing thread in queue
+    jmp_buf context;
+    bthread_t current_tid;        // Current executing thread id
 } __bthread_scheduler_private;
-
 
 
 /**
@@ -49,8 +48,9 @@ __bthread_scheduler_private. Fields of this structure need to be initialized as 
 Other functions will call this method to obtain this pointer. This function should not be accessible
 outside the library.
 */
-__bthread_scheduler_private* bthread_get_scheduler();
-__bthread_scheduler_private* scheduler;
+__bthread_scheduler_private *bthread_get_scheduler();
+
+__bthread_scheduler_private *scheduler;
 
 void bthread_cleanup();
 

@@ -69,13 +69,14 @@ void bthread_yield(){
 }
 
 /**
-Terminates the calling thread and returns a value via retval that will be available to another
-thread in the same process that calls bthread_join, then yields to the scheduler. Between
-bthread_exit and the corresponding bthread_join the thread stays in the
-__BTHREAD_ZOMBIE state.
+Termina il thread chiamante e restituisce un valore tramite retval che sarà disponibile per un altro thread nello stesso processo che chiama bthread_join,
+quindi cede allo scheduler. Tra bthread_exit e il corrispondente bthread_join il thread rimane nello stato __BTHREAD_ZOMBIE.
 */
 void bthread_exit(void *retval) {
+    __bthread_scheduler_private* scheduler = bthread_get_scheduler();
+    __bthread_private* currThread = (__bthread_private*) tqueue_get_data(scheduler->current_item);
+    currThread->state = __BTHREAD_ZOMBIE;
 
+    retval = currThread->retval;
+    bthread_yield();
 }
-
-
