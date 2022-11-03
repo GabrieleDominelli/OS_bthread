@@ -50,7 +50,7 @@ outside the library.
 */
 __bthread_scheduler_private *bthread_get_scheduler();
 
-__bthread_scheduler_private *scheduler;
+
 
 void bthread_cleanup();
 

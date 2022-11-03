@@ -14,14 +14,15 @@ int bthread_create(bthread_t *bthread, const bthread_attr_t *attr, void *(*start
 
     __bthread_private* thread = malloc(sizeof(__bthread_private));
 
+    thread->tid = scheduler->current_tid;
     thread->stack = NULL;
     thread->arg = arg;
     thread->attr = *attr;
     thread->body = start_routine;
 
-    bthread = (bthread_t *) thread;
+    *bthread = scheduler->current_tid++;
 
-	tqueue_enqueue(scheduler->queue, bthread);
+	tqueue_enqueue(&scheduler->queue, thread);
 
 }
 
@@ -77,6 +78,6 @@ void bthread_exit(void *retval) {
     __bthread_private* currThread = (__bthread_private*) tqueue_get_data(scheduler->current_item);
     currThread->state = __BTHREAD_ZOMBIE;
 
-    retval = currThread->retval;
+    currThread->retval = retval;
     bthread_yield();
 }
