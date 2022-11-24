@@ -16,8 +16,9 @@ bthread_t t1, t2, t3;
 void* bthread1(void* arg)
 {    
 
-    for(a=0; a<100; a++) {
+    for(a=0; a<5; a++) {
         printf("BThread1: %s %d\n", (const char*) arg, a);
+		bthread_sleep(2000);
         bthread_yield();
     }
     printf("BThread1 exiting\n");
@@ -26,7 +27,7 @@ void* bthread1(void* arg)
 
 void* bthread2(void* arg)
 {
-    for(b=0; b<200; b++) {
+    for(b=0; b<5; b++) {
         printf("BThread2: %s %d\n", (const char*) arg, b);
         bthread_yield();
     }
@@ -36,7 +37,7 @@ void* bthread2(void* arg)
 
 void* bthread3(void* arg)
 {
-    for(c=0; c<300; c++) {
+    for(c=0; c<5; c++) {
         printf("BThread3: %s %d\n", (const char*) arg, c);
         bthread_yield();
     }

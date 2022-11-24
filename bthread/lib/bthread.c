@@ -88,19 +88,23 @@ int bthread_join(bthread_t bthread, void **retval)
     do {
         scheduler->current_item = tqueue_at_offset(scheduler->current_item, 1);
         tp = (__bthread_private*) tqueue_get_data(scheduler->current_item);
+
+		if(tp->state == __BTHREAD_SLEEPING && tp->wake_up_time <= get_current_time_millis())
+			tp->state = __BTHREAD_READY;
+		
     } while (tp->state != __BTHREAD_READY);
-// Restore context or setup stack and perform first call
+	// Restore context or setup stack and perform first call
     if (tp->stack) {
         restore_context(tp->context);
     } else {
         tp->stack = (char*) malloc(sizeof(char) * STACK_SIZE);
-#if __x86_64__
-        asm __volatile__("movq %0, %%rsp" ::
-                         "r"((intptr_t) (tp->stack + STACK_SIZE - 1)));
-#else
-        asm __volatile__("movl %0, %%esp" ::
-                         "r"((intptr_t) (tp->stack + STACK_SIZE - 1)));
-#endif
+		#if __x86_64__
+			asm __volatile__("movq %0, %%rsp" ::
+							"r"((intptr_t) (tp->stack + STACK_SIZE - 1)));
+		#else
+			asm __volatile__("movl %0, %%esp" ::
+							"r"((intptr_t) (tp->stack + STACK_SIZE - 1)));
+		#endif
         bthread_exit(tp->body(tp->arg));
     }
     assert(0);
@@ -126,3 +130,28 @@ void bthread_exit(void *retval)
     bthread_yield();
 }
 
+
+double get_current_time_millis()
+{
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ;
+}
+
+/**
+ * When calling bthread_sleep the state of the thread is set to __BTHREAD_SLEEPING and then the thread
+ * must yield to the scheduler. The wake up time is computed from the current time, obtained using
+ * get_current_time_millis().
+ * 
+ * Each time the thread is considered for execution the scheduler must first check if it's sleeping: in that
+ * situation the scheduler compares the current time with the wake up time and if necessary changes the state
+ * to __BTHREAD_READY to enable execution.
+*/
+void bthread_sleep(double ms) {
+	__bthread_scheduler_private* scheduler = bthread_get_scheduler();
+    __bthread_private* thread = (__bthread_private*) tqueue_get_data(scheduler->current_item);
+
+	thread->state = __BTHREAD_SLEEPING;
+	thread->wake_up_time = get_current_time_millis() + ms;
+	bthread_yield();
+}
