@@ -55,6 +55,7 @@ TQueue tqueue_at_offset(TQueue q, unsigned long int offset)
     TQueueNode* head = q;
     for(index=0; index < offset; index++) {
         head = head->next;
+        //if (head == q) return NULL;
     }
     return head;
 }

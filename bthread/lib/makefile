@@ -1,28 +1,31 @@
-# https://solver.assistedcoding.eu/makefilegen
+CFLAGS = -ffixed-r8 -ffixed-r9 -ffixed-r10 -ffixed-r11
+CC = gcc -O0 -g -Wall -std=gnu11 $(CFLAGS) -Wno-discarded-qualifiers
+CC_OBJ = $(CC) -c $(CFLAGS)
+CORE_OBJ = tqueue.o bthread.o
+LIBS = -lm
 
-OBJS	= main.o bthread_private.o bthread.o tqueue.o
-SOURCE	= main.c bthread_private.c bthread.c tqueue.c
-HEADER	= bthread_private.h bthread.h tqueue.h
-OUT	= main
-CC	 = gcc
-FLAGS	 = -g -c -Wall
-LFLAGS	 = 
+all: bthread.o bthread_test tqueue_test
 
-all: $(OBJS)
-	$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS)
+tqueue.o: tqueue.c tqueue.h
+	$(CC_OBJ) $< $(LIBS)
+	
+bthread.o: bthread.c bthread.h tqueue.o
+	$(CC_OBJ) $< $(LIBS)
 
-main.o: main.c
-	$(CC) $(FLAGS) main.c 
+bthread_test: bthread_test.c $(CORE_OBJ)
+	$(CC) -o $@ $< $(LIBS) $(CORE_OBJ) 
+	
 
-bthread_private.o: bthread_private.c
-	$(CC) $(FLAGS) bthread_private.c 
-
-bthread.o: bthread.c
-	$(CC) $(FLAGS) bthread.c 
-
-tqueue.o: tqueue.c
-	$(CC) $(FLAGS) tqueue.c 
-
-
+tqueue_test: tqueue_test.c tqueue.o
+	$(CC) -o $@ $(LIBS) $^ 
+	
+style:
+	astyle -A8 *.c
+	astyle -A8 *.h
+	rm -f *.orig
+	
 clean:
-	rm -f $(OBJS) $(OUT)
+	rm -rf bthread_test tqueue_test
+	rm -rf *.o
+	
+	
